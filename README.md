@@ -10,3 +10,5 @@ Since data is available in MATLAB matrix format and recorded as graph, it is req
 
 - use `src/scripts/dataset_parser.py` to parse .mat files to .net and .nodelist formats native to network graphs and py (standardized networkx package for working with networks)
 - parse it to dataset (Pandas readable) with baseline feature and topology. Use `src/scripts/create_dataset.py`
+
+**NOTE**: in `src/scripts/dataset_parser.py` is defined `NETWORKS_NUMBER = 2`, which is a constant for parsing user defined number of networks. Facebook100, has **100** networks.
