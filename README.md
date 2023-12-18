@@ -5,6 +5,9 @@ with Hadoop and Link Prediction on facebook100 dataset
 
 ## Data
 
+Extract data to folder dataset.
+
+Mat files should be on path `./dataset/facebook100/facebook100/.mat`
 Data used is obtained from this [paper](https://archive.org/details/oxford-2005-facebook-matrix).
 Since data is available in MATLAB matrix format and recorded as graph, it is required to:
 
