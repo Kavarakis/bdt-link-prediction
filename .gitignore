@@ -161,4 +161,5 @@ cython_debug/
 
 dataset/data/*
 dataset/facebook100/*
+dataset/output/*
 !/**/.gitkeep
