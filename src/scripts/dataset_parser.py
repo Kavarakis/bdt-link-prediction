@@ -17,7 +17,7 @@ year, and high school. Missing data is coded 0.
 
 """
 
-PATH = "./dataset/facebook100/facebook100"
+PATH = "./dataset/facebook100"
 
 
 node_attributes = [
@@ -96,7 +96,7 @@ def export_graph(G, write_filename):
     f.close()
 
 
-NETWORKS_NUMBER = 2
+# NETWORKS_NUMBER = 2
 if __name__ == "__main__":
     if not os.path.isdir(PATH):
         raise ModuleNotFoundError("No data in folder dataset")
@@ -120,6 +120,6 @@ if __name__ == "__main__":
             for node in values:
                 G.nodes[node][attribute] = values[node]
         export_graph(G, network_name)
-        if counter + 1 >= NETWORKS_NUMBER:
-            print(f"Parsed {NETWORKS_NUMBER} networks, breaking procedure... ")
-            break
+        # if counter + 1 >= NETWORKS_NUMBER:
+        # print(f"Parsed {NETWORKS_NUMBER} networks, breaking procedure... ")
+        # break
