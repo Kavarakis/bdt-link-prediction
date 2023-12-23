@@ -161,6 +161,7 @@ cython_debug/
 
 dataset/data/*
 dataset/facebook100/*
+dataset/output/*
 !/**/.gitkeep
 .DS_Store
 .python-version
