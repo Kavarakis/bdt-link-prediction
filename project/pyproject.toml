@@ -1,0 +1,11 @@
+[project]
+name = "mysparkjobs"
+version = "0.0.1"
+
+dependencies = [
+    'numpy',
+    'pyspark',
+    'scipy',
+    'networkx',
+    'boto3',
+]
