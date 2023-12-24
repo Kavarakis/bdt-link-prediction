@@ -1,0 +1,17 @@
+[project]
+name = "mysparkjobs"
+version = "0.0.1"
+
+
+[tool.poetry.dependencies]
+python = "^3.8"
+numpy = "1.26.2"
+pyspark = "3.5.0"
+scipy = "1.11.4"
+networkx = "3.2.1"
+
+# Assuming you're still using pytest for development
+[tool.poetry.dev-dependencies]
+pytest = "7.1.2"
+
+# Add any other dependencies here that you're sure are used in your code
