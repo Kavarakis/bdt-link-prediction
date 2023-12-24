@@ -20,9 +20,10 @@
 ## ----------------------------------------------------------------------------
 ##  Base stage for python development
 ## ----------------------------------------------------------------------------
-FROM --platform=linux/amd64 amazonlinux:2 AS base
+FROM --platform=linux/amd64 rennancockles/amazonlinux-python-buildpack:python3.9 AS base
 
-RUN yum install -y python3 tar gzip
+RUN yum install -y python3.8 tar gzip
+
 
 ENV VIRTUAL_ENV=/opt/venv
 RUN python3 -m venv $VIRTUAL_ENV

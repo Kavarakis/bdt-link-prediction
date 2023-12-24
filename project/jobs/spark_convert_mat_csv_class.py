@@ -3,6 +3,7 @@ import networkx as nx
 from pyspark.sql import SparkSession
 from pyspark.sql.types import StructType, StructField, IntegerType, StringType
 import boto3
+import io
 
 node_attributes = [
     "student_fac",
@@ -53,11 +54,11 @@ class SparkConvertMatToCSV:
         """Read a .mat file from S3"""
         response = s3.get_object(Bucket=bucket_name, Key=key)
         content = response["Body"].read()
-        return loadmat(BytesIO(content))
+        return loadmat(io.BytesIO(content))
 
     def write_df_to_s3(self, df, key):
         """Write a DataFrame to a CSV on S3"""
-        csv_buffer = BytesIO()
+        csv_buffer = io.BytesIO()
         df.to_csv(csv_buffer)
         s3.put_object(Bucket=bucket_name, Body=csv_buffer.getvalue(), Key=key)
 
