@@ -1,48 +1,31 @@
-ARG PYTHON_VERSION=3.10.6
+# Use Python 3.10.6 slim image as base
+FROM python:3.10.6-slim as base
 
-FROM --platform=linux/amd64 amazonlinux:2 AS base
-ARG PYTHON_VERSION
+# Set the working directory
+WORKDIR /app
 
-# Install Python 3.10.6 - Note that python 3.10 requires OpenSSL >= 1.1.1
-RUN yum install -y gcc openssl11-devel bzip2-devel libffi-devel tar gzip wget make && \
-    wget https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz && \
-    tar xzf Python-${PYTHON_VERSION}.tgz && \
-    cd Python-${PYTHON_VERSION} && \
-    ./configure --enable-optimizations && \
-    make install
+# Copy the current directory contents into the container
+COPY . .
 
-# Create our virtual environment
-# we need both --copies for python executables for cp for libraries
+# Set up the virtual environment
 ENV VIRTUAL_ENV=/opt/venv
-RUN python3 -m venv $VIRTUAL_ENV --copies
-RUN cp -r /usr/local/lib/python3.10/* $VIRTUAL_ENV/lib/python3.10/
-
-# Ensure our python3 executable references the virtual environment
+RUN python -m venv $VIRTUAL_ENV --copies
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-# Upgrade pip (good practice) and install venv-pack
-# You can install additional packages here or copy requirements.txt
-RUN python3 -m pip install --upgrade pip && \
-    python3 -m pip install venv-pack==0.2.0
-
-# Install Poetry
+# Install dependencies and packages
+RUN pip install --upgrade pip
+RUN pip install venv-pack==0.2.0
 RUN pip install poetry
 ENV PATH="$PATH:/root/.local/bin"
 
-WORKDIR /app
-COPY . .
+# Install application dependencies using Poetry
+# If you have a pyproject.toml and poetry.lock file, uncomment the following lines
+# COPY pyproject.toml poetry.lock ./
+# RUN poetry install --no-dev
 
-# Package the env
-# note you have to supply --python-prefix option to make sure python starts with the path where your copied libraries are present
-RUN mkdir /output && \
-    venv-pack -o /output/pyspark_${PYTHON_VERSION}.tar.gz --python-prefix /home/hadoop/environment
+# Build and package the environment
+RUN mkdir /output && venv-pack -o /output/pyspark_deps.tar.gz --python-prefix $VIRTUAL_ENV
 
-# Build stage for poetry
-FROM base as build-poetry
-RUN poetry self add poetry-plugin-bundle && \
-    poetry bundle venv dist/bundle --without dev && \
-    tar -czvf dist/pyspark_deps.tar.gz -C dist/bundle . && \
-    rm -rf dist/bundle
-
-FROM scratch as export-poetry
-COPY --from=build-poetry /app/dist/pyspark_deps.tar.gz /
+# Define the export-python stage
+FROM scratch AS export-python
+COPY --from=base /output/pyspark_deps.tar.gz /
