@@ -1,31 +1,60 @@
-# Use Python 3.10.6 slim image as base
-FROM python:3.10.6-slim as base
+# This is a muti-stage Dockerfile that can be used to build many different types of
+# bundled dependencies for PySpark projects. 
+# The `base` stage installs generic tools necessary for packaging.
+#
+# There are `export-` and `build-` stages for the different types of projects.
+# - python-packages - Generic support for Python projects with pyproject.toml
+# - poetry - Support for Poetry projects
+#
+# This Dockerfile is generated automatically as part of the emr-cli tool.
+# Feel free to modify it for your needs, but leave the `build-` and `export-`
+# stages related to your project.
+#
+# To build manually, you can use the following command, assuming 
+# the Docker BuildKit backend is enabled. https://docs.docker.com/build/buildkit/
+#
+# Example for building a poetry project and saving the output to dist/ folder
+# docker build --target export-poetry --output dist .
 
-# Set the working directory
-WORKDIR /app
 
-# Copy the current directory contents into the container
-COPY . .
+# Use the Amazon EMR Serverless Spark base image
+FROM --platform=linux/amd64 public.ecr.aws/emr-serverless/spark/emr-7.0.0:latest AS base
 
-# Set up the virtual environment
+# Run as root user for installation purposes
+USER root
+
+# Print Python version for confirmation
+RUN python3 --version
+
+# Create a virtual environment
 ENV VIRTUAL_ENV=/opt/venv
-RUN python -m venv $VIRTUAL_ENV --copies
+RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-# Install dependencies and packages
-RUN pip install --upgrade pip
-RUN pip install venv-pack==0.2.0
-RUN pip install poetry
-ENV PATH="$PATH:/root/.local/bin"
+# Set Python path for PySpark
+ENV PYSPARK_PYTHON=/usr/bin/python3
 
-# Install application dependencies using Poetry
-# If you have a pyproject.toml and poetry.lock file, uncomment the following lines
-# COPY pyproject.toml poetry.lock ./
-# RUN poetry install --no-dev
+# Upgrade pip in the virtual environment
+RUN python3 -m pip install --upgrade pip
 
-# Build and package the environment
-RUN mkdir /output && venv-pack -o /output/pyspark_deps.tar.gz --python-prefix $VIRTUAL_ENV
+# Copy your application code to the container
+WORKDIR /app
+COPY . .
 
-# Define the export-python stage
+# Install dependencies including venv-pack
+# No need for sudo as you're already root
+RUN python3 -m pip install venv-pack==0.2.0
+RUN python3 -m pip install .
+
+# Package the virtual environment with venv-pack
+RUN mkdir /output && venv-pack -f -o /output/pyspark_deps.tar.gz
+
+# Switch to non-root user for running the application
+USER hadoop:hadoop
+
+# The packaged virtual environment is now ready to be used
+
+
+# Export stage - used to copy packaged venv to local filesystem
 FROM scratch AS export-python
 COPY --from=base /output/pyspark_deps.tar.gz /

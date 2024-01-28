@@ -8,4 +8,5 @@ dependencies = [
     'scipy',
     'networkx',
     'boto3',
+    'botocore',
 ]

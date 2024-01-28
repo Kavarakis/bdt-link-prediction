@@ -143,7 +143,7 @@ class SparkConvertMatToCSV:
             )
             print("//::", network_name)
             print("Now parsing:", network_name)
-            matlab_object = loadmat(matlab_filename)
+            matlab_object = self.read_mat_file_s3(matlab_filename)
             scipy_sparse_graph = matlab_object["A"]
             G = nx.from_scipy_sparse_array(scipy_sparse_graph)
             print("Number of nodes:", G.number_of_nodes())
